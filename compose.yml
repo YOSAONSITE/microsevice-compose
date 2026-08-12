@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  mariadb-yosa:
+    build:
+      context: ./database-service
+      dockerfile: mariadb.Containerfile
+    container_name: mariadb-yosa
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: db_yosa
+      MYSQL_USER: yosa_user
+      MYSQL_PASSWORD: yosa_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  php-apache-yosa:
+    build:
+      context: ./web-service
+      dockerfile: php-apache.Containerfile
+    container_name: php-apache-yosa
+    restart: always
+    ports:
+      - "8000:80"
+    volumes:
+      - ./web-service:/var/www/html
+    environment:
+      DB_HOST: mariadb-yosa
+      DB_USER: yosa_user
+      DB_PASSWORD: yosa_password
+      DB_NAME: db_yosa
+    depends_on:
+      - mariadb-yosa
+
+  phpmyadmin-yosa:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-yosa
+    restart: always
+    ports:
+      - "8001:80"
+    environment:
+      PMA_HOST: mariadb-yosa
+      PMA_PORT: 3306
+    depends_on:
+      - mariadb-yosa
+
+volumes:
+  mariadb_data:
