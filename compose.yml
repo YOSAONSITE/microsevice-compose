@@ -1,32 +1,32 @@
-version: '3.8'
-
 services:
   mariadb-yosa:
     build:
       context: ./database-service
       dockerfile: mariadb.Containerfile
     container_name: mariadb-yosa
-    restart: always
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: db_yosa
-      MYSQL_USER: yosa_user
-      MYSQL_PASSWORD: yosa_password
+      MYSQL_USER: yosa
+      MYSQL_PASSWORD: yosa123
     ports:
       - "3306:3306"
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - mariadb_data:/var/lib/mysql:Z
+    networks:
+      - yosa-net
 
   php-apache-yosa:
     build:
       context: ./web-service
       dockerfile: php-apache.Containerfile
     container_name: php-apache-yosa
-    restart: always
+    restart: unless-stopped
     ports:
       - "8000:80"
     volumes:
-      - ./web-service:/var/www/html
+      - ./web-service:/var/www/html:z
     environment:
       DB_HOST: mariadb-yosa
       DB_USER: yosa_user
@@ -34,11 +34,13 @@ services:
       DB_NAME: db_yosa
     depends_on:
       - mariadb-yosa
+    networks:
+      - yosa-net
 
   phpmyadmin-yosa:
-    image: phpmyadmin/phpmyadmin
+    image: docker.io/phpmyadmin/phpmyadmin:latest
     container_name: phpmyadmin-yosa
-    restart: always
+    restart: unless-stopped
     ports:
       - "8001:80"
     environment:
@@ -46,6 +48,12 @@ services:
       PMA_PORT: 3306
     depends_on:
       - mariadb-yosa
+    networks:
+      - yosa-net
 
 volumes:
   mariadb_data:
+
+networks:
+  yosa-net:
+    driver: bridge
