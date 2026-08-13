@@ -29,8 +29,8 @@ services:
       - ./web-service:/var/www/html:z
     environment:
       DB_HOST: mariadb-yosa
-      DB_USER: yosa_user
-      DB_PASSWORD: yosa_password
+      DB_USER: yosa
+      DB_PASSWORD: yosa123
       DB_NAME: db_yosa
     depends_on:
       - mariadb-yosa
